@@ -150,14 +150,11 @@
 					var motUD = null;
 					var orientation = window.orientation;
 					if(event.webkitCompassHeading) {
-   						dir = event.webkitCompassHeading;
-						textDir = "webkitcompass";
+   						dir = 350 - event.webkitCompassHeading;
    					}else if(event.compassHeading) {
    						dir = event.compassHeading;
-						textDir = "compass";
    					}else{
    						dir = eventData.alpha;
-						textDir = "alpha";
    					}
 					console.log("Tilt FB: " + tiltFB);
 					console.log("Direction: " + dir);
