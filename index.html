@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en"> 
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+	
+	<style type="text/css">
+			
+			.debug {
+				font-size: 200%;
+			}
+
+			#container {
+/*				-webkit-perspective: 300;
+				perspective: 300;
+				background-color: #f00;
+*/
+			}
+			card-shoe {
+				display: block;
+				width: 250px;
+				float: left;
+				margin: 20px;
+				box-shadow: 0 0 10px rgba(0,0,0,0.27);
+				overflow:hidden;
+			    -webkit-transition: -webkit-transform 1s, box-shadow 1s;
+			    transition: transform 1s,  box-shadow 1s;
+
+			}
+			card-shoe p{
+				text-align: center;
+			}
+			card-shoe:hover {
+				-webkit-transform: scale(1.1) rotate(5deg);
+				transform: scale(1.1) rotate(5deg);
+				box-shadow: 0 0 20px rgba(255,0,0,0.27);
+			}
+			#compass {
+				display: none;
+				width: 200px;
+				margin: auto;
+				transform-origin: 50% 50%;
+				-webkit-transform-origin: 50% 50%;
+			}
+
+			#compass2 {
+				width: 200px;
+				margin: auto;
+				transform-origin: 50% 50%;
+				-webkit-transform-origin: 50% 50%;
+			}
+
+			#distText {
+				margin: auto;
+				font-size: 50px;
+				font-weight: 900;
+				text-align: center;
+			}
+
+			img {
+				max-width: 100%;
+				margin: auto;
+			}
+
+
+	</style>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+	<script type="text/javascript">
+		// VARIABLES
+		// status
+		var appStatus = {
+			firstSearch: 0,
+			firstLocate: 0
+		};
+		// user settings
+		var userSettings = {
+			searchTerm : 'kebab'
+		};
+		// location of user
+		var currentLoc = {
+			latitude : null,
+			longitude: null
+		};
+		// location of destination
+		var targetLoc = {
+			requested : false,
+			latitude : null,
+			longitude: null,
+			locName: null
+		};
+		// directions
+		var currentDirections = {
+			distance : null,
+			bearing: null
+		};
+		// options for geolocation.watchPosition
+		var options = {
+			enableHighAccuracy: true,
+			timeout: 5000,
+			maximumAge: 0
+		};
+		// phone orientation
+		var phoneOrient = {
+			absolute: false,
+			orientation: 0,
+			direction: 0,
+			compass: 0,
+			tiltFB: 0,
+			tiltLR: 0	
+		}
+		// debugging
+		var debugValues = {
+			deviceMotion: "false",
+			deviceOrientationEvent: "false"
+		}
+
+		function refreshDebug(){
+					document.getElementById("debugText").innerHTML = 
+					"appStatus: firstSearch: " + appStatus.firstSearch + 
+					"<br/>appStatus: firstLocate: " + appStatus.firstLocate + 
+					"<br/>usersettings: searchTerm: " + userSettings.searchTerm + 
+					"<br/>currentLoc: latitude: " + currentLoc.latitude + 
+					"<br/>currentLoc: longitude: " + currentLoc.longitude + 
+					"<br/>targetLoc: latitude: " + targetLoc.latitude + 
+					"<br/>targetLoc: longitude: " + targetLoc.longitude + 
+					"<br/>targetLoc: locName: " + targetLoc.locName + 
+					"<br/>currentDirections: distance: " + currentDirections.distance + 
+					"<br/>currentDirections: bearing: " + currentDirections.bearing + 
+					"<br/>phoneOrient: Tilt FB: " + phoneOrient.tiltFB + 
+					"<br/>phoneOrient: direction: " + phoneOrient.direction + 
+					"<br/>phoneOrient: Absolute: " + phoneOrient.absolute + 
+					"<br/>debugValues: deviceMotion: " + debugValues.deviceMotion + 
+					"<br/>debugValues: deviceOrientationEvent: " + debugValues.deviceOrientationEvent;
+				}
+
+		window.onload = function() {
+			if(window.DeviceMotion) { debugValues.deviceMotion = true; }
+			// initiate geolocation.watchPosition, triggers "new location" everytime location changes
+			var checkLoc = navigator.geolocation.watchPosition(newLocation, error, options);
+			// add event listeners for device orientation
+			if (window.DeviceOrientationEvent) {
+				debugValues.deviceOrientationEvent = true;
+				window.addEventListener('deviceorientation', function(eventData) {
+					var tiltLR = eventData.gamma;					
+					var tiltFB = eventData.beta;
+					var dir;
+					var textDir;
+					var absolute = eventData.absolute;
+					var compass = eventData.compassHeading;
+					var motUD = null;
+					var orientation = window.orientation;
+					if(event.webkitCompassHeading) {
+   						dir = event.webkitCompassHeading;
+						textDir = "webkitcompass";
+   					}else if(event.compassHeading) {
+   						dir = event.compassHeading;
+						textDir = "compass";
+   					}else{
+   						dir = eventData.alpha;
+						textDir = "alpha";
+   					}
+					console.log("Tilt FB: " + tiltFB);
+					console.log("Direction: " + dir);
+					console.log("Absolute: " + absolute);
+					deviceOrientationHandler(tiltLR, tiltFB, dir, compass, motUD, orientation, absolute);
+				}, false);
+			//	browser detection - not supported
+			} else {
+				document.getElementById("compass").innerHTML = "Not supported on your device or browser.  Sorry."
+			}
+		}
+		// query yelp via kebab.php 
+		function findTarget(){
+			if(!targetLoc.requested){
+				targetLoc.requested = true;
+				var dataStr = '/findme/search.php?lat=' + currentLoc.latitude + '&lon=' + currentLoc.longitude + '&search=' + userSettings.searchTerm;
+				console.log(dataStr);
+				loadJSON(dataStr,
+	         		function(data) {
+	         			console.log(data);
+	         			console.log(data['location']['coordinate']['latitude']);
+	         			console.log(data['location']['coordinate']['longitude']);
+						targetLoc.latitude = data['location']['coordinate']['latitude'];
+						targetLoc.longitude = data['location']['coordinate']['longitude'];
+						targetLoc.locName = data['name'];
+						if(appStatus.firstSearch == 0){
+							appStatus.firstSearch = 1;
+						}
+						newBearing();
+		     		},
+	         		function(xhr) { console.error(xhr); }
+				);
+			}
+		}	
+		// function to load JSON
+		function loadJSON(path, success, error){
+		    var xhr = new XMLHttpRequest();
+		    xhr.onreadystatechange = function()
+		    {
+		        if (xhr.readyState === XMLHttpRequest.DONE) {
+		            if (xhr.status === 200) {
+		                if (success)
+		                    success(JSON.parse(xhr.responseText));
+		            } else {
+		                if (error)
+		                    error(xhr);
+		            }
+		        }
+		    };
+		    xhr.open("GET", path, true);
+		    xhr.send();
+		}
+		// calculate distance from start (1) to destination (2) latitude and longitude in degrees
+		function calculateDistance(lat1, lon1, lat2, lon2) {
+			var R = 6371; // km
+			var dLat = (lat2 - lat1).toRad();
+			var dLon = (lon2 - lon1).toRad(); 
+			var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(lat1.toRad()) * Math.cos(lat2.toRad()) * Math.sin(dLon / 2) * Math.sin(dLon / 2); 
+			var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); 
+			var d = R * c;
+			return d;
+		}
+		// calculate bearing from start (1) to destination (2) latitude and longitude in degrees
+		function calculateBearing(lat1, lon1, lat2, lon2){
+			lat1 = lat1.toRad();
+			lat2 = lat2.toRad();
+			lon1 = lon1.toRad();
+			lon2 = lon2.toRad();
+			var y = Math.sin(lon2-lon1) * Math.cos(lat2);
+			var x = Math.cos(lat1)*Math.sin(lat2) -
+			Math.sin(lat1)*Math.cos(lat2)*Math.cos(lon2-lon1);
+			var brng = Math.atan2(y, x).toDegrees();
+			return brng;
+		}
+		// convert degrees to radians
+		Number.prototype.toRad = function() {
+			return this * Math.PI / 180;
+		}
+		// convert radians to degrees
+		Number.prototype.toDegrees = function() {
+			return this * 180 / Math.PI;
+		}
+
+		// set current location, called whenever position changes by "navigator.geolocation.watchPosition"
+		function newLocation(pos) {
+			var currentCoords = pos.coords;
+			currentLoc.latitude = currentCoords.latitude;
+			currentLoc.longitude = currentCoords.longitude;
+			console.log("Latitude: " + currentCoords.latitude);
+			console.log("Longitude: " + currentCoords.longitude);
+		}
+
+		// set current location, called whenever position changes by "navigator.geolocation.watchPosition"
+		function newBearing() {
+			currentDirections.distance = calculateDistance(currentLoc.latitude, currentLoc.longitude, targetLoc.latitude, targetLoc.longitude);
+			currentDirections.bearing = calculateBearing(currentLoc.latitude, currentLoc.longitude, targetLoc.latitude, targetLoc.longitude);
+			updateCompass();
+		}
+
+		// display error in console if geolocation watchevent fails
+		function error(err) {
+		  console.warn('ERROR(' + err.code + '): ' + err.message);
+		}
+		// change the display of the compass
+		function updateCompass(){
+			// tidy up distance string
+			if(currentDirections.distance>=10000){
+				distText=Math.round(currentDirections.distance);
+			}else{
+				distText=currentDirections.distance.toPrecision(4);				
+				distText=Math.round(distText*1000)/1000;
+			}
+			// calculate correct rotation from phone direction, orientation and bearing
+			compassRotate = (currentDirections.bearing-phoneOrient.direction)-phoneOrient.orientation;
+			compassRotate = phoneOrient.direction + currentDirections.bearing;
+			compassRotate2 = phoneOrient.direction;
+			// Apply the transform to the compass
+			document.getElementById("compass").style.webkitTransform = "rotate("+compassRotate+"deg) rotate3d(1,0,0, "+ (phoneOrient.tiltFB*-1)+"deg)";
+			document.getElementById("compass").style.MozTransform = "rotate("+compassRotate+"deg)";
+			document.getElementById("compass").style.transform = "rotate("+compassRotate+"deg) rotate3d(1,0,0, "+ (phoneOrient.tiltFB*-1)+"deg)";
+			document.getElementById("compass2").style.webkitTransform = "rotate("+compassRotate2+"deg) rotate3d(1,0,0, "+ (phoneOrient.tiltFB*-1)+"deg)";
+			document.getElementById("compass2").style.MozTransform = "rotate("+compassRotate2+"deg)";
+			document.getElementById("compass2").style.transform = "rotate("+compassRotate2+"deg) rotate3d(1,0,0, "+ (phoneOrient.tiltFB*-1)+"deg)";
+			// update the distance text
+			document.getElementById("distText").innerHTML = distText;
+			// make sure compass is visible
+			document.getElementById("start").style.display = "none";
+			document.getElementById("compass").style.display = "block";
+		}
+		// every time the orientation of the device is update values of "phoneOrient" and then update compass display
+		function deviceOrientationHandler(tiltLR, tiltFB, dir, compass, motionUD, orientation, absolute) {
+			phoneOrient.absolute = absolute;
+			phoneOrient.direction = dir;	
+			phoneOrient.compass = compass;	
+			phoneOrient.tiltFB = tiltFB;	
+			phoneOrient.tiltLR = tiltLR;
+			if(!targetLoc.requested && currentLoc.latitude && currentLoc.longitude){
+				findTarget();
+			}
+			if(currentLoc.latitude && currentLoc.longitude && targetLoc.latitude && targetLoc.longitude){
+				newBearing();
+			}
+			refreshDebug();
+		}
+
+	</script>
+</head>
+<body>
+	<div id="container">
+
+		<div id="start">FindMe</div>
+		<div id="compass">
+			<img src="arrow.png">
+			<div id="distText"></div>
+		</div>
+		<div id="compass2">
+			<img src="arrow.png">
+		</div>
+	</div>
+	<div class="debug" id="debugText">00000</div>
+</body>
+</html>

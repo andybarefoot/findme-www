@@ -1,0 +1,94 @@
+<!DOCTYPE html>  
+<html>  
+<head>  
+<script src="../scripts/jquery-1.6.4.min.js"></script>  
+<script src="../scripts/geo-ab.js"></script>
+<script>  
+	jQuery(window).ready(function(){  
+		initiate_watchlocation();  
+	});  
+
+	var watchProcess = null;  
+
+	function initiate_watchlocation() {
+		if (watchProcess == null) {
+			watchProcess = navigator.geolocation.watchPosition(handle_geolocation_query, handle_errors);
+		}  
+	}  
+
+	function stop_watchlocation() {
+		if (watchProcess != null){
+			navigator.geolocation.clearWatch(watchProcess);
+			watchProcess = null;
+		}
+	}  
+
+	function handle_errors(error){
+		switch(error.code){
+			case error.PERMISSION_DENIED: alert("user did not share geolocation data");
+			break;
+			
+			case error.POSITION_UNAVAILABLE: alert("could not detect current position");
+			break;
+			
+			case error.TIMEOUT: alert("retrieving position timedout");
+			break;
+			
+			default: alert("unknown error");
+			break;
+		}
+	}  
+ 	function handle_geolocation_query(position) {
+		lat=position.coords.latitude;
+		lon=position.coords.longitude;  
+    	lat1=lat;
+		lon1=lon;
+//		lat2=52.35419043; lon2=4.882811575;
+//		lat2=52.3520000; lon2=4.8850000;
+//		lat2=52.3540000; lon2=4.8900000;
+//		lat2=52.3580000; lon2=4.8910000;
+//		lat2=52.3640000; lon2=4.8870000;
+		lat2=52.3740001; lon2=4.8500001;
+//		lat2=52.3640000; lon2=4.8170000; 
+
+		var d = getDistance(lat1,lon1,lat2,lon2);
+		var brng = getBearing(lat1,lon1,lat2,lon2);	
+
+		var difStraight=d;
+		$("body").removeClass('boiling , hot, warm, lukewarm, cold, freezing');
+		if(difStraight<0.1){
+			htmlStr="boiling";
+			$("body").addClass('boiling');
+		}else if(difStraight<0.3){
+			htmlStr="hot";
+			$("body").addClass('hot');
+		}else if(difStraight<0.6){
+			htmlStr="warm";
+			$("body").addClass('warm');
+		}else if(difStraight<1){
+			htmlStr="lukewarm";
+			$("body").addClass('lukewarm');
+		}else if(difStraight<3){
+			htmlStr="cold";
+			$("body").addClass('cold');
+		}else{
+			htmlStr="freezing";
+			$("body").addClass('freezing');
+		}
+		htmlStr+=" | Distance: " + difStraight+", Bearing: "+brng+" | Lat: "+lat+", Lon: "+lon;
+		$('div.warmth').html(htmlStr);
+	}
+</script>  
+<style>
+.boiling { background-color: #CC0033; }
+.hot { background-color: #CC3300; }
+.warm { background-color: #FF9900; }
+.lukewarm { background-color: #FFFFCC; }
+.cold { background-color: #CCFFFF; }
+.freezing { background-color: #66CCFF; }
+</style>
+</head>  
+<body>
+<div class="warmth"></div>
+</body>
+</html>
