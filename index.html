@@ -3,108 +3,15 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Kebab Me</title>
-	<link href='https://fonts.googleapis.com/css?family=Lobster' rel='stylesheet' type='text/css'>
-	<style type="text/css">
-			html {
-			  box-sizing: border-box;
-			}
-
-			*, *:before, *:after {
-			  box-sizing: inherit;
-			}
-
-			body {
-				background-color: #B2DFDB;
-				color: #00695C;
-				font-family: 'Lobster', cursive;
-				text-align: center;
-			}
-			h1 {
-				font-size: 4em;
-			}
-			.debug {
-				font-size: 200%;
-			}
-
-			#container {
-/*				-webkit-perspective: 300;
-				perspective: 300;
-				background-color: #f00;
-*/
-			}
-			card-shoe {
-				display: block;
-				width: 250px;
-				float: left;
-				margin: 20px;
-				box-shadow: 0 0 10px rgba(0,0,0,0.27);
-				overflow:hidden;
-			    -webkit-transition: -webkit-transform 1s, box-shadow 1s;
-			    transition: transform 1s,  box-shadow 1s;
-
-			}
-			card-shoe p{
-				text-align: center;
-			}
-			card-shoe:hover {
-				-webkit-transform: scale(1.1) rotate(5deg);
-				transform: scale(1.1) rotate(5deg);
-				box-shadow: 0 0 20px rgba(255,0,0,0.27);
-			}
-			#compass {
-				width: 200px;
-				margin: auto;
-				transform-origin: 50% 50%;
-				-webkit-transform-origin: 50% 50%;
-			}
-
-			#compass2 {
-				width: 200px;
-				margin: auto;
-				transform-origin: 50% 50%;
-				-webkit-transform-origin: 50% 50%;
-			}
-
-			#distText {
-				margin: auto;
-				font-size: 50px;
-				font-weight: 900;
-				text-align: center;
-			}
-
-			img {
-				max-width: 100%;
-				margin: auto;
-			}
-
-			#navigation {
-				width: 100%;
-				background-color: #ddd;
-			}
-
-			.menu {
-				box-shadow: 0 0 6px rgba(0,0,0,0.27);
-				margin-left: 2.5%;
-				padding: 20px 0 20px 0;
-				float: left;
-				width: 30%;
-				background-color: #004D40;
-				color: #E0F2F1;
-				text-align: center;
-				font-size: 1.5em;
-			}
-
-			.screen {
-				padding: 20px;
-			}
-
-
-
-	</style>
+	<link href='https://fonts.googleapis.com/css?family=Gravitas+One' rel='stylesheet' type='text/css'>
+	<link href='https://fonts.googleapis.com/css?family=Merriweather' rel='stylesheet' type='text/css'>
+	<link rel="stylesheet" href="reset.css">
+	<link rel="stylesheet" href="main.css">
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
 	<script type="text/javascript">
 		// VARIABLES
-		var drunkennessLevel = ["Sober", "Tiddly", "Squiffy", "Tipsy", "Drunk", "Bladdered"];
+		var drunkennessLevel = ["Sober", "Drunk", "Bladdered"];
+		var userLevel = 1;
 		// status
 		var appStatus = {
 			firstSearch: 0,
@@ -173,9 +80,9 @@
 		}
 
 		window.onload = function() {
-			document.getElementById("menuCompass").onclick = function() {showContent("finder");};
-			document.getElementById("menuSettings").onclick = function() {showContent("settings");};
-			document.getElementById("menuDebug").onclick = function() {showContent("debug");};
+			//document.getElementById("menuCompass").onclick = function() {showContent("finder");};
+			//document.getElementById("menuSettings").onclick = function() {showContent("settings");};
+			//document.getElementById("menuDebug").onclick = function() {showContent("debug");};
 			showContent("intro");
 			if(window.DeviceMotion) {
 				debugValues.deviceMotion = true;
@@ -359,7 +266,7 @@
 				// update the distance text
 				document.getElementById("distText").innerHTML = distText;
 			}
-
+			updateEncouragement();
 		}
 		// every time the orientation of the device is update values of "phoneOrient" and then update compass display
 		function deviceOrientationHandler(tiltLR, tiltFB, dir, compass, motionUD, orientation, absolute) {
@@ -373,38 +280,86 @@
 			}
 		}
 
+		function updateEncouragement() {
+			if(userLevel==0){
+				if(currentDirections.distance>5){
+					encouragementText = "An ideal opportunity for a nice hike to work up an appetite.";
+				}else if(currentDirections.distance>2){
+					encouragementText = "You will work off any calories you might gain.";
+				}else if(currentDirections.distance>0.5){
+					encouragementText = "It would be a longer walk to the nearest greengrocer for a healthy apple.";
+				}else{
+					encouragementText = "You are virually there. What are you waiting for?";
+				}
+			}else if(userLevel==1){
+				if(currentDirections.distance>5){
+					encouragementText = "You are Edmund Hillary and this late night snack is your Everest.<br/>Conquer it!";
+				}else if(currentDirections.distance>2){
+					encouragementText = "You are within 2 minutes now.<br/>At least you are if you sprint.<br/> Run! Run like the wind!";
+				}else if(currentDirections.distance>0.5){
+					encouragementText = "So close!<br/>Your arteries will thank you for the exercise if not the grease.";
+				}else{
+					encouragementText = "You should be able to smell it.<br/>Can you smell it?<br/>SMELLL IT!";
+				}
+			}else if(userLevel==2){
+				if(currentDirections.distance>5){
+					encouragementText = "KEBAB!<br/>MUST HAVE KEBAB!!";
+				}else if(currentDirections.distance>2){
+					encouragementText = "KEBAB!<br/>KEBAB!<br/>KEBAB!<br/>KEBAB!";
+				}else if(currentDirections.distance>0.5){
+					encouragementText = "KEBAB!<br/>KEBAB!<br/>KEEEEEEEEEEBAAAAAAAAAAB!!!!!";
+				}else{
+					encouragementText = "ONE LARGE KEBAB WITH EXTRA CHILI SAUCE PLEASE!";
+				}
+			}
+			document.getElementById("encouragement").innerHTML = encouragementText;
+			if(userLevel==2 && currentDirections.distance<0.5){
+				document.getElementById("encouragementTitle").innerHTML = "Ordering instructions<br/>";
+			}else{
+				document.getElementById("encouragementTitle").innerHTML = "Encouragement<br/>";
+			}
+		}
+
 		function outputUpdate(drunk) {
 			document.querySelector('#drunkenness').value = drunkennessLevel[drunk];
+			userLevel = drunk;
+			updateEncouragement();
 		}
 
 	</script>
 </head>
 <body>
 	<div id="intro" class="screen">
-		<h1>KebabMe</h1>
+		<h1>KEBAB ME</h1>
 		<div id="geoText"></div>
 	</div>
 	<div id="finder" class="screen">
 		<div id="compass">
 			<img id="arrow" src="arrow.png">
-			<div id="distText"></div>
+			<h2 id="distText"></h2>
+		</div>
+		<div id="encour">
+			<span id="encouragementTitle"></span>
+			<span id="encouragement"></span>
+		</div>
+		<div id="controller">
+			<!-- <label for="fader">Drunkenness:</label> -->
+			<input type="range" min="0" max="2" value="1" id="fader" oninput="outputUpdate(value)">
+			<output for="fader" id="drunkenness">Drunk</output>
 		</div>
 	</div>
 	<div id="settings" class="screen">
 		SETTINGS
-		<div id="controller">
-		<label for="fader">Drunkenness:</label>
-			<input type="range" min="0" max="5" value="4" id="fader" oninput="outputUpdate(value)">
-			<output for="fader" id="drunkenness">Drunk</output>
-		</div>
 	</div>
 	<div id="debug" class="screen">
 		<div class="debug" id="debugText">00000</div>
 	</div>
+<!--
 	<div>
 		<div id="menuCompass" class="menu">Compass</div>
 		<div id="menuSettings" class="menu">Settings</div>
 		<div id="menuDebug" class="menu">Debug</div>
 	</div>
+-->
 </body>
 </html>
