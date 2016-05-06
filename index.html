@@ -257,9 +257,9 @@
 
 		function updateEncouragement() {
 			if(!phoneOrient.compassSupport){
-				encouragementText = "Unable to determine accurate direction information on your device or broswer.<br /><br /><a href='geo:" + targetLoc.latitude + "," + targetLoc.latitude + "'>View in Google Maps.</a>";
+				encouragementText = "Unable to determine accurate direction information on your device or broswer.<br /><br /><a href='geo:" + targetLoc.latitude + "," + targetLoc.longitude + "'>View in Google Maps.</a>";
 			}else{
-				encouragementText = "<a href='geo:" + targetLoc.latitude + "," + targetLoc.latitude + "'>View in Google Maps.</a>";
+				encouragementText = "<a href='geo:" + targetLoc.latitude + "," + targetLoc.longitude + "'>View in Google Maps.</a>";
 			}
 			document.getElementById("encouragement").innerHTML = encouragementText;
 		}
