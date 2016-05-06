@@ -9,9 +9,6 @@
 	<link rel="stylesheet" href="main.css">
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
 	<script type="text/javascript">
-		// VARIABLES
-		var drunkennessLevel = ["Sober", "Drunk", "Bladdered"];
-		var userLevel = 1;
 		// status
 		var appStatus = {
 			firstSearch: 0,
@@ -46,6 +43,7 @@
 		};
 		// phone orientation
 		var phoneOrient = {
+			compassSupport: false,
 			motion: false,
 			absolute: false,
 			orientation: 0,
@@ -60,29 +58,7 @@
 			deviceOrientationEvent: "false"
 		}
 
-		function refreshDebug(){
-			document.getElementById("debugText").innerHTML = 
-			"appStatus: firstSearch: " + appStatus.firstSearch + 
-			"<br/>appStatus: firstLocate: " + appStatus.firstLocate + 
-			"<br/>usersettings: searchTerm: " + userSettings.searchTerm + 
-			"<br/>currentLoc: latitude: " + currentLoc.latitude + 
-			"<br/>currentLoc: longitude: " + currentLoc.longitude + 
-			"<br/>targetLoc: latitude: " + targetLoc.latitude + 
-			"<br/>targetLoc: longitude: " + targetLoc.longitude + 
-			"<br/>targetLoc: locName: " + targetLoc.locName + 
-			"<br/>currentDirections: distance: " + currentDirections.distance + 
-			"<br/>currentDirections: bearing: " + currentDirections.bearing + 
-			"<br/>phoneOrient: Tilt FB: " + phoneOrient.tiltFB + 
-			"<br/>phoneOrient: direction: " + phoneOrient.direction + 
-			"<br/>phoneOrient: Absolute: " + phoneOrient.absolute + 
-			"<br/>debugValues: deviceMotion: " + debugValues.deviceMotion + 
-			"<br/>debugValues: deviceOrientationEvent: " + debugValues.deviceOrientationEvent;
-		}
-
 		window.onload = function() {
-			//document.getElementById("menuCompass").onclick = function() {showContent("finder");};
-			//document.getElementById("menuSettings").onclick = function() {showContent("settings");};
-			//document.getElementById("menuDebug").onclick = function() {showContent("debug");};
 			showContent("intro");
 			if(window.DeviceMotion) {
 				debugValues.deviceMotion = true;
@@ -119,14 +95,7 @@
 				document.getElementById("compass").innerHTML = "Not supported on your device or browser.  Sorry."
 			}
 			checkFindYet = setInterval(checkFind,1000);
-			printDebugNow = setInterval(printDebug,1000);
 		}
-
-		function printDebug(){
-			refreshDebug();
-		}
-
-
 
 		function checkFind(){
 			if(!targetLoc.requested && currentLoc.latitude && currentLoc.longitude){
@@ -241,10 +210,7 @@
 		}
 		// change the display of the compass
 		function updateCompass(){
-			if(document.getElementById('intro').style.display == 'block'){
-				document.getElementById('intro').style.display = 'none'
-				document.getElementById('finder').style.display = 'block'
-			}
+			showContent('finder');
 			// tidy up distance string
 			if(currentDirections.distance>=10000){
 				distText=Math.round(currentDirections.distance);
@@ -252,11 +218,7 @@
 				distText=currentDirections.distance.toPrecision(4);				
 				distText=Math.round(distText*1000)/1000;
 			}
-			if(!phoneOrient.deviceMotion || (phoneOrient.direction == 0 && phoneOrient.direction ==0)){
-				document.getElementById("noCompassText").innerHTML = "Nearest kebab is " + distText + "km away!";
-				document.getElementById("compass").style.display = 'none';
-				document.getElementById("noCompass").style.display = 'block';
-			} else {
+			if(phoneOrient.compassSupport){
 				// calculate correct rotation from phone direction, orientation and bearing
 				compassRotate = (currentDirections.bearing-phoneOrient.direction)-phoneOrient.orientation;
 				compassRotate = phoneOrient.direction + currentDirections.bearing;
@@ -268,6 +230,10 @@
 				document.getElementById("distText").innerHTML = distText;
 				document.getElementById("compass").style.display = 'block';
 				document.getElementById("noCompass").style.display = 'none';
+			} else {
+				document.getElementById("noCompassText").innerHTML = "Nearest kebab is " + distText + "km away!";
+				document.getElementById("compass").style.display = 'none';
+				document.getElementById("noCompass").style.display = 'block';
 			}
 			updateEncouragement();
 		}
@@ -281,52 +247,21 @@
 			if(currentLoc.latitude && currentLoc.longitude && targetLoc.latitude && targetLoc.longitude){
 				newBearing();
 			}
+			if(!phoneOrient.deviceMotion || (phoneOrient.direction == 0 && phoneOrient.direction ==0)){
+				phoneOrient.compassSupport = false;
+			}else{
+				phoneOrient.compassSupport = true;
+			}
+
 		}
 
 		function updateEncouragement() {
-			if(userLevel==0){
-				if(currentDirections.distance>5){
-					encouragementText = "An ideal opportunity for a nice hike to work up an appetite.";
-				}else if(currentDirections.distance>2){
-					encouragementText = "You will work off any calories you might gain.";
-				}else if(currentDirections.distance>0.5){
-					encouragementText = "It would be a longer walk to the nearest greengrocer for a healthy apple.";
-				}else{
-					encouragementText = "You are virually there. What are you waiting for?";
-				}
-			}else if(userLevel==1){
-				if(currentDirections.distance>5){
-					encouragementText = "You are Edmund Hillary and this late night snack is your Everest.<br/>Conquer it!";
-				}else if(currentDirections.distance>2){
-					encouragementText = "You are within 2 minutes now.<br/>At least you are if you sprint.<br/> Run! Run like the wind!";
-				}else if(currentDirections.distance>0.5){
-					encouragementText = "So close!<br/>Your arteries will thank you for the exercise if not the grease.";
-				}else{
-					encouragementText = "You should be able to smell it.<br/>Can you smell it?<br/>SMELLL IT!";
-				}
-			}else if(userLevel==2){
-				if(currentDirections.distance>5){
-					encouragementText = "KEBAB!<br/>MUST HAVE KEBAB!!";
-				}else if(currentDirections.distance>2){
-					encouragementText = "KEBAB!<br/>KEBAB!<br/>KEBAB!<br/>KEBAB!";
-				}else if(currentDirections.distance>0.5){
-					encouragementText = "KEBAB!<br/>KEBAB!<br/>KEEEEEEEEEEBAAAAAAAAAAB!!!!!";
-				}else{
-					encouragementText = "ONE LARGE KEBAB WITH EXTRA CHILI SAUCE PLEASE!";
-				}
+			if(!phoneOrient.compassSupport){
+				encouragementText = "Unable to determine accurate direction information on your device or broswer.<br /><br /><a href='geo:" + targetLoc.latitude + "," + targetLoc.latitude + "'>View in Google Maps.</a>";
+			}else{
+				encouragementText = "<a href='geo:" + targetLoc.latitude + "," + targetLoc.latitude + "'>View in Google Maps.</a>";
 			}
 			document.getElementById("encouragement").innerHTML = encouragementText;
-			if(userLevel==2 && currentDirections.distance<0.5){
-				document.getElementById("encouragementTitle").innerHTML = "Ordering instructions<br/>";
-			}else{
-				document.getElementById("encouragementTitle").innerHTML = "Encouragement<br/>";
-			}
-		}
-
-		function outputUpdate(drunk) {
-			document.querySelector('#drunkenness').value = drunkennessLevel[drunk];
-			userLevel = drunk;
-			updateEncouragement();
 		}
 
 	</script>
@@ -346,29 +281,11 @@
 			<h2 id="noCompassText"></h2>
 		</div>
 		<div id="encour">
-			<span id="encouragementTitle"></span>
 			<span id="encouragement"></span>
 		</div>
-		<div id="controller">
-			<!-- <label for="fader">Drunkenness:</label> -->
-			<input type="range" min="0" max="2" value="1" id="fader" oninput="outputUpdate(value)">
-			<output for="fader" id="drunkenness">Drunk</output>
-		</div>
+<!--		<div id="settings">
+			<img src="settings.png">
+		</div> -->
 	</div>
-
-	<div id="settings" class="screen">
-		SETTINGS
-	</div>
-
-	<div id="debug" class="screen">
-		<div class="debug" id="debugText">00000</div>
-	</div>
-<!--
-	<div>
-		<div id="menuCompass" class="menu">Compass</div>
-		<div id="menuSettings" class="menu">Settings</div>
-		<div id="menuDebug" class="menu">Debug</div>
-	</div>
--->
 </body>
 </html>
