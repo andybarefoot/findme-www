@@ -179,12 +179,12 @@
 			showContent("intro");
 			if(window.DeviceMotion) {
 				debugValues.deviceMotion = true;
-				phoneOrient.deviceMotion = true;
 			}
 			// initiate geolocation.watchPosition, triggers "new location" everytime location changes
 			var checkLoc = navigator.geolocation.watchPosition(newLocation, geoError, options);
 			// add event listeners for device orientation
 			if (window.DeviceOrientationEvent) {
+				phoneOrient.deviceMotion = true;
 				debugValues.deviceOrientationEvent = true;
 				window.addEventListener('deviceorientation', function(eventData) {
 					var tiltLR = eventData.gamma;					
@@ -345,7 +345,10 @@
 				distText=currentDirections.distance.toPrecision(4);				
 				distText=Math.round(distText*1000)/1000;
 			}
-			if(phoneOrient.deviceMotion){
+			if(!phoneOrient.deviceMotion || (phoneOrient.direction == 0 && phoneOrient.direction ==0)){
+				document.getElementById("distText").innerHTML = "Nearest kebab is " + distText + "km away!";
+				document.getElementById("arrow").style.display = 'none';
+			} else {
 				// calculate correct rotation from phone direction, orientation and bearing
 				compassRotate = (currentDirections.bearing-phoneOrient.direction)-phoneOrient.orientation;
 				compassRotate = phoneOrient.direction + currentDirections.bearing;
@@ -355,9 +358,6 @@
 				document.getElementById("compass").style.transform = "rotate("+compassRotate+"deg) rotate3d(1,0,0, "+ (phoneOrient.tiltFB*-1)+"deg)";
 				// update the distance text
 				document.getElementById("distText").innerHTML = distText;
-			} else {
-				document.getElementById("distText").innerHTML = "Nearest kebab is " + distText + "km away!";
-				document.getElementById("arrow").style.display = 'none';
 			}
 
 		}
