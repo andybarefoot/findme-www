@@ -218,6 +218,7 @@
 				distText=currentDirections.distance.toPrecision(4);				
 				distText=Math.round(distText*1000)/1000;
 			}
+			distText += "km"; 
 			if(phoneOrient.compassSupport){
 				// calculate correct rotation from phone direction, orientation and bearing
 				compassRotate = (currentDirections.bearing-phoneOrient.direction)-phoneOrient.orientation;
@@ -257,9 +258,9 @@
 
 		function updateEncouragement() {
 			if(!phoneOrient.compassSupport){
-				encouragementText = "Unable to determine accurate direction information on your device or broswer.<br /><br /><a href='geo:" + targetLoc.latitude + "," + targetLoc.longitude + "'>View in Google Maps.</a>";
+				encouragementText = "Unable to determine accurate direction information on your device or broswer.<br /><br /><a href='geo:0,0?q=" + targetLoc.latitude + "," + targetLoc.longitude + "(Kebab)'>View in Google Maps.</a>";
 			}else{
-				encouragementText = "<a href='geo:" + targetLoc.latitude + "," + targetLoc.longitude + "'>View in Google Maps.</a>";
+				encouragementText = "<a href='geo:0,0?q=" + targetLoc.latitude + "," + targetLoc.longitude + "(Kebab)'>View in Google Maps.</a>";
 			}
 			document.getElementById("encouragement").innerHTML = encouragementText;
 		}
