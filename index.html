@@ -253,8 +253,9 @@
 				distText=Math.round(distText*1000)/1000;
 			}
 			if(!phoneOrient.deviceMotion || (phoneOrient.direction == 0 && phoneOrient.direction ==0)){
-				document.getElementById("distText").innerHTML = "Nearest kebab is " + distText + "km away!";
-				document.getElementById("arrow").style.display = 'none';
+				document.getElementById("noCompassText").innerHTML = "Nearest kebab is " + distText + "km away!";
+				document.getElementById("compass").style.display = 'none';
+				document.getElementById("noCompass").style.display = 'block';
 			} else {
 				// calculate correct rotation from phone direction, orientation and bearing
 				compassRotate = (currentDirections.bearing-phoneOrient.direction)-phoneOrient.orientation;
@@ -265,6 +266,8 @@
 				document.getElementById("compass").style.transform = "rotate("+compassRotate+"deg) rotate3d(1,0,0, "+ (phoneOrient.tiltFB*-1)+"deg)";
 				// update the distance text
 				document.getElementById("distText").innerHTML = distText;
+				document.getElementById("compass").style.display = 'block';
+				document.getElementById("noCompass").style.display = 'none';
 			}
 			updateEncouragement();
 		}
@@ -333,10 +336,14 @@
 		<h1>KEBAB ME</h1>
 		<div id="geoText"></div>
 	</div>
+
 	<div id="finder" class="screen">
 		<div id="compass">
 			<img id="arrow" src="arrow.png">
 			<h2 id="distText"></h2>
+		</div>
+		<div id="noCompass">
+			<h2 id="noCompassText"></h2>
 		</div>
 		<div id="encour">
 			<span id="encouragementTitle"></span>
@@ -348,9 +355,11 @@
 			<output for="fader" id="drunkenness">Drunk</output>
 		</div>
 	</div>
+
 	<div id="settings" class="screen">
 		SETTINGS
 	</div>
+
 	<div id="debug" class="screen">
 		<div class="debug" id="debugText">00000</div>
 	</div>

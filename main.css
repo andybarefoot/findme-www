@@ -11,7 +11,7 @@ body {
 	color: #090909;
 	font-family: 'Merriweather', serif;
 	text-align: center;
-	font-size: 1.6em;
+	font-size: 20px;
     margin-bottom:100px;
 }
 
@@ -20,9 +20,9 @@ font-style: normal;
     font-variant: normal;
     font-weight: 400;
     font-stretch: normal;
-    font-size: 76px;
-    line-height: 64px;
-    letter-spacing: -4px;
+    font-size: 60px;
+    line-height: 50px;
+    letter-spacing: -3px;
 	font-family: 'Gravitas One', cursive;
     margin: 100px 0 40px 0;
 }
@@ -30,31 +30,23 @@ h2 {
     font-variant: normal;
     font-weight: 400;
     font-stretch: normal;
-    font-size: 57px;
-    line-height: 48px;
-    letter-spacing: -3px;
+    font-size: 40px;
+    line-height: 34px;
+    letter-spacing: -2px;
 	font-family: 'Gravitas One', cursive;
-	font-size: 5em;
 }
 
-#encouragementTitle, #drunkeness{
+#encouragementTitle, #drunkenness{
     font-variant: normal;
     font-weight: 400;
     font-stretch: normal;
-    font-size: 29px;
-    line-height: 34px;
-    letter-spacing: -1.5px;
+    font-size: 20px;
+    line-height: 30px;
+    letter-spacing: -1px;
 	font-family: 'Gravitas One', cursive;
 }
 
 #drunkenness {
-    font-variant: normal;
-    font-weight: 400;
-    font-stretch: normal;
-    font-size: 29px;
-    line-height: 34px;
-    letter-spacing: -1.5px;
-	font-family: 'Gravitas One', cursive;
 	margin: auto;
 	margin-top:30px;
 	display: block;
@@ -80,29 +72,19 @@ h2 {
     margin-bottom:0px;
 }
 
-card-shoe {
-	display: block;
-	width: 250px;
-	float: left;
-	margin: 20px;
-	box-shadow: 0 0 10px rgba(0,0,0,0.27);
-	overflow:hidden;
-    -webkit-transition: -webkit-transform 1s, box-shadow 1s;
-    transition: transform 1s,  box-shadow 1s;
-
-}
-card-shoe p{
-	text-align: center;
-}
-card-shoe:hover {
-	-webkit-transform: scale(1.1) rotate(5deg);
-	transform: scale(1.1) rotate(5deg);
-	box-shadow: 0 0 20px rgba(255,0,0,0.27);
-}
 #compass {
 	width: 80%;
 	max-width: 600px;
 	margin: auto;
+	transform-origin: 50% 50%;
+	-webkit-transform-origin: 50% 50%;
+}
+
+#noCompass {
+	width: 80%;
+	max-width: 600px;
+	margin: auto;
+	margin-top: 50px;
 	transform-origin: 50% 50%;
 	-webkit-transform-origin: 50% 50%;
 }
@@ -236,4 +218,129 @@ input[type=range]:focus::-ms-fill-lower {
 input[type=range]:focus::-ms-fill-upper {
   background: #367ebd;
 }
+
+
+@media screen and (min-width: 400px){	
+	h1 {
+	font-style: normal;
+	    font-size: 72px;
+	    line-height: 60px;
+	    letter-spacing: -4px;
+	}
+	h2 {
+	    font-size: 48px;
+	    line-height: 40px;
+	    letter-spacing: -3px;
+	}
+	#encouragementTitle, #drunkenness{
+	    font-size: 20px;
+	    line-height: 30px;
+	    letter-spacing: -1px;
+	}
+}
+
+@media screen and (min-width: 600px){	
+	body {
+		font-size: 30px;
+		margin-bottom: 120px;
+	}
+	#controller{
+	    height:120px;
+	}
+	h1 {
+	font-style: normal;
+	    font-size: 100px;
+	    line-height: 84px;
+	    letter-spacing: -6px;
+	}
+	h2 {
+	    font-size: 72px;
+	    line-height: 64px;
+	    letter-spacing: -4px;
+	}
+	#encouragementTitle, #drunkenness{
+	    font-size: 30px;
+	    line-height: 45px;
+	    letter-spacing: -2px;
+	}
+}
+
+@media screen and (min-width: 800px){	
+	body {
+		font-size: 40px;
+		margin-bottom: 140px;
+	}
+	#controller{
+	    height:140px;
+	}
+	h1 {
+	font-style: normal;
+	    font-size: 144px;
+	    line-height: 120px;
+	    letter-spacing: -8px;
+	}
+	h2 {
+	    font-size: 96px;
+	    line-height: 80px;
+	    letter-spacing: -6px;
+	}
+	#encouragementTitle, #drunkenness{
+	    font-size: 40px;
+	    line-height: 60px;
+	    letter-spacing: -2px;
+	}
+}
+
+@media screen and (min-width: 1000px){	
+	body {
+		font-size: 50px;
+		margin-bottom: 140px;
+	}
+	#controller{
+	    height:140px;
+	}
+	h1 {
+	font-style: normal;
+	    font-size: 180px;
+	    line-height: 150px;
+	    letter-spacing: -10px;
+	}
+	h2 {
+	    font-size: 120px;
+	    line-height: 100px;
+	    letter-spacing: -7.5px;
+	}
+	#encouragementTitle, #drunkenness{
+	    font-size: 50px;
+	    line-height: 75px;
+	    letter-spacing: -2.5px;
+	}
+}
+
+@media screen and (min-width: 1200px){	
+	body {
+		font-size: 60px;
+		margin-bottom: 160px;
+	}
+	#controller{
+	    height:160px;
+	}
+	h1 {
+	font-style: normal;
+	    font-size: 216px;
+	    line-height: 180px;
+	    letter-spacing: -12px;
+	}
+	h2 {
+	    font-size: 144px;
+	    line-height: 120px;
+	    letter-spacing: -9px;
+	}
+	#encouragementTitle, #drunkenness{
+	    font-size: 60px;
+	    line-height: 90px;
+	    letter-spacing: -3px;
+	}
+}
+
 
