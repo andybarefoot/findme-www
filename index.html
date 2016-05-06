@@ -2,10 +2,26 @@
 <html lang="en"> 
 <head>
 	<meta charset="UTF-8">
-	<title></title>
-	
+	<title>Kebab Me</title>
+	<link href='https://fonts.googleapis.com/css?family=Lobster' rel='stylesheet' type='text/css'>
 	<style type="text/css">
-			
+			html {
+			  box-sizing: border-box;
+			}
+
+			*, *:before, *:after {
+			  box-sizing: inherit;
+			}
+
+			body {
+				background-color: #B2DFDB;
+				color: #00695C;
+				font-family: 'Lobster', cursive;
+				text-align: center;
+			}
+			h1 {
+				font-size: 4em;
+			}
 			.debug {
 				font-size: 200%;
 			}
@@ -36,7 +52,6 @@
 				box-shadow: 0 0 20px rgba(255,0,0,0.27);
 			}
 			#compass {
-				display: none;
 				width: 200px;
 				margin: auto;
 				transform-origin: 50% 50%;
@@ -62,11 +77,34 @@
 				margin: auto;
 			}
 
+			#navigation {
+				width: 100%;
+				background-color: #ddd;
+			}
+
+			.menu {
+				box-shadow: 0 0 6px rgba(0,0,0,0.27);
+				margin-left: 2.5%;
+				padding: 20px 0 20px 0;
+				float: left;
+				width: 30%;
+				background-color: #004D40;
+				color: #E0F2F1;
+				text-align: center;
+				font-size: 1.5em;
+			}
+
+			.screen {
+				padding: 20px;
+			}
+
+
 
 	</style>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
 	<script type="text/javascript">
 		// VARIABLES
+		var drunkennessLevel = ["Sober", "Tiddly", "Squiffy", "Tipsy", "Drunk", "Bladdered"];
 		// status
 		var appStatus = {
 			firstSearch: 0,
@@ -101,6 +139,7 @@
 		};
 		// phone orientation
 		var phoneOrient = {
+			motion: false,
 			absolute: false,
 			orientation: 0,
 			direction: 0,
@@ -115,28 +154,35 @@
 		}
 
 		function refreshDebug(){
-					document.getElementById("debugText").innerHTML = 
-					"appStatus: firstSearch: " + appStatus.firstSearch + 
-					"<br/>appStatus: firstLocate: " + appStatus.firstLocate + 
-					"<br/>usersettings: searchTerm: " + userSettings.searchTerm + 
-					"<br/>currentLoc: latitude: " + currentLoc.latitude + 
-					"<br/>currentLoc: longitude: " + currentLoc.longitude + 
-					"<br/>targetLoc: latitude: " + targetLoc.latitude + 
-					"<br/>targetLoc: longitude: " + targetLoc.longitude + 
-					"<br/>targetLoc: locName: " + targetLoc.locName + 
-					"<br/>currentDirections: distance: " + currentDirections.distance + 
-					"<br/>currentDirections: bearing: " + currentDirections.bearing + 
-					"<br/>phoneOrient: Tilt FB: " + phoneOrient.tiltFB + 
-					"<br/>phoneOrient: direction: " + phoneOrient.direction + 
-					"<br/>phoneOrient: Absolute: " + phoneOrient.absolute + 
-					"<br/>debugValues: deviceMotion: " + debugValues.deviceMotion + 
-					"<br/>debugValues: deviceOrientationEvent: " + debugValues.deviceOrientationEvent;
-				}
+			document.getElementById("debugText").innerHTML = 
+			"appStatus: firstSearch: " + appStatus.firstSearch + 
+			"<br/>appStatus: firstLocate: " + appStatus.firstLocate + 
+			"<br/>usersettings: searchTerm: " + userSettings.searchTerm + 
+			"<br/>currentLoc: latitude: " + currentLoc.latitude + 
+			"<br/>currentLoc: longitude: " + currentLoc.longitude + 
+			"<br/>targetLoc: latitude: " + targetLoc.latitude + 
+			"<br/>targetLoc: longitude: " + targetLoc.longitude + 
+			"<br/>targetLoc: locName: " + targetLoc.locName + 
+			"<br/>currentDirections: distance: " + currentDirections.distance + 
+			"<br/>currentDirections: bearing: " + currentDirections.bearing + 
+			"<br/>phoneOrient: Tilt FB: " + phoneOrient.tiltFB + 
+			"<br/>phoneOrient: direction: " + phoneOrient.direction + 
+			"<br/>phoneOrient: Absolute: " + phoneOrient.absolute + 
+			"<br/>debugValues: deviceMotion: " + debugValues.deviceMotion + 
+			"<br/>debugValues: deviceOrientationEvent: " + debugValues.deviceOrientationEvent;
+		}
 
 		window.onload = function() {
-			if(window.DeviceMotion) { debugValues.deviceMotion = true; }
+			document.getElementById("menuCompass").onclick = function() {showContent("finder");};
+			document.getElementById("menuSettings").onclick = function() {showContent("settings");};
+			document.getElementById("menuDebug").onclick = function() {showContent("debug");};
+			showContent("intro");
+			if(window.DeviceMotion) {
+				debugValues.deviceMotion = true;
+				phoneOrient.deviceMotion = true;
+			}
 			// initiate geolocation.watchPosition, triggers "new location" everytime location changes
-			var checkLoc = navigator.geolocation.watchPosition(newLocation, error, options);
+			var checkLoc = navigator.geolocation.watchPosition(newLocation, geoError, options);
 			// add event listeners for device orientation
 			if (window.DeviceOrientationEvent) {
 				debugValues.deviceOrientationEvent = true;
@@ -165,10 +211,39 @@
 			} else {
 				document.getElementById("compass").innerHTML = "Not supported on your device or browser.  Sorry."
 			}
+			checkFindYet = setInterval(checkFind,1000);
+			printDebugNow = setInterval(printDebug,1000);
 		}
+
+		function printDebug(){
+			refreshDebug();
+		}
+
+
+
+		function checkFind(){
+			if(!targetLoc.requested && currentLoc.latitude && currentLoc.longitude){
+				findTarget();
+			}
+		}
+
+		
+		function showContent(elementID){
+			var screens = document.getElementsByClassName('screen');
+			for (var i = 0; i < screens.length; ++i) {
+			    var screenX = screens[i];  
+			    	screenX.style.display = 'block';
+			    if(screenX.id == elementID){
+			    }else{
+			    	screenX.style.display = 'none';
+			    }
+			}
+		}
+
 		// query yelp via kebab.php 
 		function findTarget(){
 			if(!targetLoc.requested){
+				clearInterval(checkFindYet);
 				targetLoc.requested = true;
 				var dataStr = '/findme/search.php?lat=' + currentLoc.latitude + '&lon=' + currentLoc.longitude + '&search=' + userSettings.searchTerm;
 				console.log(dataStr);
@@ -243,8 +318,6 @@
 			var currentCoords = pos.coords;
 			currentLoc.latitude = currentCoords.latitude;
 			currentLoc.longitude = currentCoords.longitude;
-			console.log("Latitude: " + currentCoords.latitude);
-			console.log("Longitude: " + currentCoords.longitude);
 		}
 
 		// set current location, called whenever position changes by "navigator.geolocation.watchPosition"
@@ -255,11 +328,16 @@
 		}
 
 		// display error in console if geolocation watchevent fails
-		function error(err) {
-		  console.warn('ERROR(' + err.code + '): ' + err.message);
+		function geoError(err) {
+			console.warn('This is an ERROR(' + err.code + '): ' + err.message);
+			document.getElementById("geoText").innerHTML = "Sorry! Your device or browser does not support GeoLocation. If you are using Chrome please try another browser.";
 		}
 		// change the display of the compass
 		function updateCompass(){
+			if(document.getElementById('intro').style.display == 'block'){
+				document.getElementById('intro').style.display = 'none'
+				document.getElementById('finder').style.display = 'block'
+			}
 			// tidy up distance string
 			if(currentDirections.distance>=10000){
 				distText=Math.round(currentDirections.distance);
@@ -267,22 +345,21 @@
 				distText=currentDirections.distance.toPrecision(4);				
 				distText=Math.round(distText*1000)/1000;
 			}
-			// calculate correct rotation from phone direction, orientation and bearing
-			compassRotate = (currentDirections.bearing-phoneOrient.direction)-phoneOrient.orientation;
-			compassRotate = phoneOrient.direction + currentDirections.bearing;
-			compassRotate2 = phoneOrient.direction;
-			// Apply the transform to the compass
-			document.getElementById("compass").style.webkitTransform = "rotate("+compassRotate+"deg) rotate3d(1,0,0, "+ (phoneOrient.tiltFB*-1)+"deg)";
-			document.getElementById("compass").style.MozTransform = "rotate("+compassRotate+"deg)";
-			document.getElementById("compass").style.transform = "rotate("+compassRotate+"deg) rotate3d(1,0,0, "+ (phoneOrient.tiltFB*-1)+"deg)";
-			document.getElementById("compass2").style.webkitTransform = "rotate("+compassRotate2+"deg) rotate3d(1,0,0, "+ (phoneOrient.tiltFB*-1)+"deg)";
-			document.getElementById("compass2").style.MozTransform = "rotate("+compassRotate2+"deg)";
-			document.getElementById("compass2").style.transform = "rotate("+compassRotate2+"deg) rotate3d(1,0,0, "+ (phoneOrient.tiltFB*-1)+"deg)";
-			// update the distance text
-			document.getElementById("distText").innerHTML = distText;
-			// make sure compass is visible
-			document.getElementById("start").style.display = "none";
-			document.getElementById("compass").style.display = "block";
+			if(phoneOrient.deviceMotion){
+				// calculate correct rotation from phone direction, orientation and bearing
+				compassRotate = (currentDirections.bearing-phoneOrient.direction)-phoneOrient.orientation;
+				compassRotate = phoneOrient.direction + currentDirections.bearing;
+				// Apply the transform to the compass
+				document.getElementById("compass").style.webkitTransform = "rotate("+compassRotate+"deg) rotate3d(1,0,0, "+ (phoneOrient.tiltFB*-1)+"deg)";
+				document.getElementById("compass").style.MozTransform = "rotate("+compassRotate+"deg)";
+				document.getElementById("compass").style.transform = "rotate("+compassRotate+"deg) rotate3d(1,0,0, "+ (phoneOrient.tiltFB*-1)+"deg)";
+				// update the distance text
+				document.getElementById("distText").innerHTML = distText;
+			} else {
+				document.getElementById("distText").innerHTML = "Nearest kebab is " + distText + "km away!";
+				document.getElementById("arrow").style.display = 'none';
+			}
+
 		}
 		// every time the orientation of the device is update values of "phoneOrient" and then update compass display
 		function deviceOrientationHandler(tiltLR, tiltFB, dir, compass, motionUD, orientation, absolute) {
@@ -291,29 +368,43 @@
 			phoneOrient.compass = compass;	
 			phoneOrient.tiltFB = tiltFB;	
 			phoneOrient.tiltLR = tiltLR;
-			if(!targetLoc.requested && currentLoc.latitude && currentLoc.longitude){
-				findTarget();
-			}
 			if(currentLoc.latitude && currentLoc.longitude && targetLoc.latitude && targetLoc.longitude){
 				newBearing();
 			}
-			refreshDebug();
+		}
+
+		function outputUpdate(drunk) {
+			document.querySelector('#drunkenness').value = drunkennessLevel[drunk];
 		}
 
 	</script>
 </head>
 <body>
-	<div id="container">
-
-		<div id="start">FindMe</div>
+	<div id="intro" class="screen">
+		<h1>KebabMe</h1>
+		<div id="geoText"></div>
+	</div>
+	<div id="finder" class="screen">
 		<div id="compass">
-			<img src="arrow.png">
+			<img id="arrow" src="arrow.png">
 			<div id="distText"></div>
 		</div>
-		<div id="compass2">
-			<img src="arrow.png">
+	</div>
+	<div id="settings" class="screen">
+		SETTINGS
+		<div id="controller">
+		<label for="fader">Drunkenness:</label>
+			<input type="range" min="0" max="5" value="4" id="fader" oninput="outputUpdate(value)">
+			<output for="fader" id="drunkenness">Drunk</output>
 		</div>
 	</div>
-	<div class="debug" id="debugText">00000</div>
+	<div id="debug" class="screen">
+		<div class="debug" id="debugText">00000</div>
+	</div>
+	<div>
+		<div id="menuCompass" class="menu">Compass</div>
+		<div id="menuSettings" class="menu">Settings</div>
+		<div id="menuDebug" class="menu">Debug</div>
+	</div>
 </body>
 </html>
